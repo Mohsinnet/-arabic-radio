@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>راديو الوطن العربي — بث مباشر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d2226;
+    --bg-2:#0a1b1e;
+    --panel:#123338;
+    --panel-2:#173d43;
+    --line: rgba(205,163,73,0.16);
+    --gold:#cda349;
+    --gold-bright:#f0cd7c;
+    --rust:#b1502e;
+    --cream:#f3ead4;
+    --muted:#8fb0ae;
+    --danger:#c4573f;
+    --radius:16px;
+    --shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(205,163,73,0.10), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 10%, rgba(177,80,46,0.08), transparent 60%),
+      var(--bg);
+    background-attachment: fixed;
+    color:var(--cream);
+    font-family:'Cairo',sans-serif;
+    min-height:100vh;
+    padding-bottom:110px;
+    position:relative;
+    overflow-x:hidden;
+  }
+  .bg-pattern{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    opacity:0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84' viewBox='0 0 84 84'%3E%3Cg fill='none' stroke='%23CDA349' stroke-width='1'%3E%3Cpath d='M42 2 L52 22 L74 22 L58 36 L64 58 L42 46 L20 58 L26 36 L10 22 L32 22 Z'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:84px 84px;
+  }
+  button{font-family:inherit; cursor:pointer;}
+  input{font-family:inherit;}
+  ::selection{background:var(--gold); color:#1a1a1a;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative; z-index:1;
+    max-width:720px; margin:0 auto;
+    padding: 34px 20px 18px;
+    text-align:center;
+  }
+  .eyebrow{
+    font-size:12.5px; letter-spacing:2px; color:var(--gold);
+    text-transform:uppercase; font-weight:700; opacity:0.85;
+  }
+  .title{
+    font-family:'Aref Ruqaa', serif;
+    font-size: clamp(34px, 8vw, 54px);
+    margin: 6px 0 2px;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold) 60%, #a9812f);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    line-height:1.25;
+  }
+  .tagline{ color:var(--muted); font-size:14.5px; margin:0 0 22px; font-weight:500; }
+
+  /* ---------- Dial ---------- */
+  .dial-wrap{
+    position:relative;
+    width: min(230px, 55vw); height:min(230px,55vw);
+    margin: 6px auto 22px;
+  }
+  .dial-ring{
+    position:absolute; inset:0; border-radius:50%;
+    border: 1.5px solid var(--line);
+    background: conic-gradient(from 0deg, transparent 0 8deg, var(--line) 8deg 9deg);
+    background-size: 100% 100%;
+    animation: spin 90s linear infinite;
+  }
+  .dial-ring.on-air{ animation-duration:26s; }
+  .dial-star{
+    position:absolute; inset:14%;
+    animation: spin 70s linear infinite reverse;
+    filter: drop-shadow(0 0 10px rgba(205,163,73,0.15));
+    transition: filter .4s ease;
+  }
+  .dial-star.on-air{ animation-duration:22s; filter: drop-shadow(0 0 18px rgba(240,205,124,0.45)); }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .dial-freqs span{
+    position:absolute; top:50%; left:50%; font-size:9.5px; color:var(--muted);
+    font-weight:600; letter-spacing:0.5px;
+    transform-origin: 0 0;
+  }
+  .dial-center{
+    position:absolute; inset:30%;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--panel-2), var(--bg-2) 75%);
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+  }
+  .dial-center svg{ width:34%; height:34%; opacity:0.55; }
+  .dial-eq{ display:flex; align-items:flex-end; gap:4px; height:34%; }
+  .dial-eq i{
+    width:4px; background:var(--gold-bright); border-radius:2px;
+    animation: eqbounce 900ms ease-in-out infinite;
+    height:30%;
+  }
+  .dial-eq i:nth-child(1){animation-delay:0ms;}
+  .dial-eq i:nth-child(2){animation-delay:150ms;}
+  .dial-eq i:nth-child(3){animation-delay:300ms;}
+  .dial-eq i:nth-child(4){animation-delay:450ms;}
+  @keyframes eqbounce{ 0%,100%{height:20%;} 50%{height:95%;} }
+
+  .now-playing{
+    min-height:18px; font-size:13px; color:var(--gold-bright); font-weight:600;
+    margin-bottom:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  .search-wrap{
+    position:relative; max-width:420px; margin:0 auto;
+  }
+  #searchInput{
+    width:100%; padding:13px 44px 13px 16px; border-radius:999px;
+    border:1px solid var(--line); background:var(--panel);
+    color:var(--cream); font-size:15px; outline:none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  #searchInput::placeholder{ color:var(--muted); }
+  #searchInput:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(205,163,73,0.15); }
+  #clearSearch{
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    background:none; border:none; color:var(--muted); font-size:16px; padding:4px;
+  }
+  #clearSearch:hover{ color:var(--cream); }
+
+  /* ---------- Tabs / chips ---------- */
+  .region-tabs, .country-chips{
+    display:flex; gap:8px; overflow-x:auto; padding:14px 18px;
+    max-width:920px; margin:0 auto; scrollbar-width:none;
+  }
+  .region-tabs::-webkit-scrollbar, .country-chips::-webkit-scrollbar{ display:none; }
+  .region-tabs{ padding-bottom:6px; }
+  .tab-btn{
+    flex:0 0 auto; padding:9px 18px; border-radius:999px; border:1px solid var(--line);
+    background:transparent; color:var(--muted); font-weight:700; font-size:14px;
+    white-space:nowrap; transition: all .2s ease;
+  }
+  .tab-btn.active{ background:var(--gold); color:#1a1408; border-color:var(--gold); }
+  .tab-btn.fav-tab{ border-color: rgba(177,80,46,0.4); }
+  .tab-btn.fav-tab.active{ background:var(--rust); color:var(--cream); border-color:var(--rust); }
+
+  .chip{
+    flex:0 0 auto; padding:8px 14px; border-radius:12px; border:1px solid var(--line);
+    background:var(--panel); color:var(--cream); font-weight:600; font-size:13.5px;
+    display:flex; align-items:center; gap:6px; transition: all .2s ease;
+  }
+  .chip.active{ background:var(--panel-2); border-color:var(--gold); color:var(--gold-bright); }
+
+  /* ---------- Station grid ---------- */
+  main{
+    max-width:920px; margin:0 auto; padding: 8px 18px 30px;
+    position:relative; z-index:1;
+  }
+  .station-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+    gap:12px;
+  }
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:14px; display:flex; align-items:center; gap:12px;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    position:relative; overflow:hidden;
+  }
+  .card:hover{ border-color: rgba(205,163,73,0.4); transform: translateY(-1px); }
+  .card.card-active{ border-color:var(--gold); background:var(--panel-2); }
+  .card.card-active::before{
+    content:''; position:absolute; inset:0; border-radius:var(--radius);
+    box-shadow: inset 0 0 0 1px var(--gold), 0 0 22px rgba(205,163,73,0.12);
+    pointer-events:none;
+  }
+  .card-logo{
+    width:46px; height:46px; border-radius:12px; flex:0 0 auto;
+    background:var(--panel-2); display:flex; align-items:center; justify-content:center;
+    font-family:'Aref Ruqaa',serif; font-size:20px; color:var(--gold-bright);
+    overflow:hidden; border:1px solid var(--line);
+  }
+  .card-logo img{ width:100%; height:100%; object-fit:cover; }
+  .card-body{ flex:1; min-width:0; text-align:right; }
+  .card-name{ font-weight:700; font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .card-meta{ font-size:11.5px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .card-actions{ display:flex; flex-direction:column; align-items:center; gap:6px; flex:0 0 auto; }
+  .icon-btn{
+    width:34px; height:34px; border-radius:50%; border:1px solid var(--line);
+    background:var(--bg-2); color:var(--cream); display:flex; align-items:center; justify-content:center;
+    transition: all .15s ease; flex:0 0 auto;
+  }
+  .icon-btn svg{ width:15px; height:15px; }
+  .icon-btn.play{ background:var(--gold); border-color:var(--gold); color:#1a1408; }
+  .icon-btn.play svg{ width:13px; height:13px; }
+  .icon-btn.fav{ width:26px; height:26px; border:none; background:none; color:var(--muted); }
+  .icon-btn.fav.active{ color:var(--rust); }
+  .icon-btn.fav svg{ width:15px; height:15px; }
+
+  .notice-banner{
+    background: rgba(177,80,46,0.12); border:1px solid rgba(177,80,46,0.35);
+    color:var(--cream); font-size:13px; padding:10px 14px; border-radius:12px;
+    margin-bottom:12px; line-height:1.7;
+  }
+  .notice-banner .retry-btn{ margin:0 0 0 6px; padding:5px 14px; font-size:12.5px; }
+  .state-msg{
+    text-align:center; padding:50px 20px; color:var(--muted); font-size:14.5px;
+    grid-column:1/-1;
+  }
+  .state-msg .big{ font-size:34px; margin-bottom:8px; }
+  .retry-btn{
+    margin-top:14px; padding:9px 22px; border-radius:999px; border:1px solid var(--gold);
+    background:transparent; color:var(--gold-bright); font-weight:700; font-size:13.5px;
+  }
+  .retry-btn:hover{ background:rgba(205,163,73,0.1); }
+
+  .skeleton{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px; height:74px; }
+  .skeleton .sk-line{
+    background: linear-gradient(90deg, var(--panel-2) 25%, rgba(255,255,255,0.05) 50%, var(--panel-2) 75%);
+    background-size:200% 100%; animation: shimmer 1.4s infinite; border-radius:6px;
+  }
+  @keyframes shimmer{ 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+  /* ---------- Player bar ---------- */
+  .player-bar{
+    position:fixed; bottom:0; left:0; right:0; z-index:20;
+    background: rgba(10,27,30,0.92); backdrop-filter: blur(10px);
+    border-top:1px solid var(--line);
+    padding: 10px 16px; padding-bottom: max(10px, env(safe-area-inset-bottom));
+    display:flex; align-items:center; gap:12px;
+    max-width:920px; margin:0 auto; left:0; right:0;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.35);
+    transform: translateY(0); transition: transform .3s ease;
+  }
+  .player-bar[hidden]{ display:none; }
+  .player-eq{ display:flex; align-items:flex-end; gap:3px; height:22px; flex:0 0 auto; }
+  .player-eq i{ width:3px; background:var(--gold-bright); border-radius:2px; height:20%; animation: eqbounce 900ms ease-in-out infinite; animation-play-state:paused; }
+  .player-eq.on i{ animation-play-state:running; }
+  .player-eq i:nth-child(1){animation-delay:0ms;}
+  .player-eq i:nth-child(2){animation-delay:180ms;}
+  .player-eq i:nth-child(3){animation-delay:360ms;}
+  .player-eq i:nth-child(4){animation-delay:540ms;}
+  .player-info{ flex:1; min-width:0; text-align:right; }
+  .player-name{ font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .player-sub{ font-size:11.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .player-controls{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  #volume{ width:70px; accent-color:var(--gold); display:none; }
+  @media (min-width:560px){ #volume{ display:block; } }
+
+  footer{
+    max-width:920px; margin:0 auto; padding:10px 20px 20px; text-align:center;
+    color:var(--muted); font-size:11.5px; position:relative; z-index:1; line-height:1.9;
+  }
+  a.src-link{ color:var(--gold); text-decoration:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .dial-ring, .dial-star, .dial-eq i, .player-eq i, .skeleton .sk-line{ animation:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+
+<header class="hero">
+  <div class="eyebrow">إذاعات الوطن العربي · بث مباشر</div>
+  <h1 class="title">راديو الوطن العربي</h1>
+  <p class="tagline">من الخليج إلى المحيط، على موجة واحدة</p>
+
+  <div class="dial-wrap">
+    <div class="dial-ring" id="dialRing"></div>
+    <svg class="dial-star" id="dialStar" viewBox="0 0 100 100">
+      <polygon points="50,4 61,35 92,29 68,50 92,71 61,65 50,96 39,65 8,71 32,50 8,29 39,35"
+        fill="none" stroke="#cda349" stroke-width="1.4" stroke-linejoin="round" opacity="0.8"/>
+      <circle cx="50" cy="50" r="30" fill="none" stroke="#cda349" stroke-width="0.6" opacity="0.4"/>
+    </svg>
+    <div class="dial-freqs" id="dialFreqs"></div>
+    <div class="dial-center" id="dialCenter">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#f3ead4" stroke-width="1.6" stroke-linecap="round">
+        <path d="M4 11a8 8 0 0 1 16 0"/><path d="M7.5 11a4.5 4.5 0 0 1 9 0"/><circle cx="12" cy="15" r="2" fill="#f3ead4" stroke="none"/>
+      </svg>
+    </div>
+  </div>
+  <div class="now-playing" id="nowPlaying"></div>
+
+  <div class="search-wrap">
+    <input id="searchInput" type="text" placeholder="ابحث عن محطة أو مدينة…" autocomplete="off">
+    <button id="clearSearch" hidden aria-label="مسح البحث">✕</button>
+  </div>
+</header>
+
+<nav class="region-tabs" id="regionTabs"></nav>
+<div class="country-chips" id="countryChips"></div>
+
+<main>
+  <div id="gridNotice"></div>
+  <div class="station-grid" id="stationGrid"></div>
+</main>
+
+<div class="player-bar" id="playerBar" hidden>
+  <div class="player-eq" id="playerEq"><i></i><i></i><i></i><i></i></div>
+  <div class="player-info">
+    <div class="player-name" id="playerName">—</div>
+    <div class="player-sub" id="playerSub">—</div>
+  </div>
+  <div class="player-controls">
+    <button class="icon-btn fav" id="playerFavBtn" aria-label="إضافة للمفضلة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c2 0 3.5 1.2 4.5 2.5C12 6.2 13.5 5 15.5 5 19 5 21.5 8.5 19.5 12.5 17 16.65 12 21 12 21z"/></svg>
+    </button>
+    <button class="icon-btn play" id="playPauseBtn" aria-label="تشغيل / إيقاف">
+      <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <input id="volume" type="range" min="0" max="1" step="0.01" value="0.85" aria-label="مستوى الصوت">
+    <button class="icon-btn" id="closeBtn" aria-label="إغلاق المشغل">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+</div>
+
+<footer>
+  البث يصل مباشرة من خوادم الإذاعات نفسها، وقد تختلف الجودة أو التوفر حسب المحطة.<br>
+  بيانات المحطات عبر <a class="src-link" href="https://www.radio-browser.info" target="_blank" rel="noopener">Radio-Browser</a>
+</footer>
+
+<audio id="audio" preload="none"></audio>
+
+<script>
+(function(){
+  "use strict";
+
+  const MIRRORS = [
+    "https://de1.api.radio-browser.info",
+    "https://nl1.api.radio-browser.info",
+    "https://at1.api.radio-browser.info"
+  ];
+
+  const REGIONS = [
+    { id:"favorites", name:"⭐ المفضلة", isFav:true, countries:[] },
+    { id:"gulf", name:"الخليج العربي", countries:[
+      {code:"SA", name:"السعودية", flag:"🇸🇦"},
+      {code:"AE", name:"الإمارات", flag:"🇦🇪"},
+      {code:"KW", name:"الكويت", flag:"🇰🇼"},
+      {code:"QA", name:"قطر", flag:"🇶🇦"},
+      {code:"BH", name:"البحرين", flag:"🇧🇭"},
+      {code:"OM", name:"عُمان", flag:"🇴🇲"},
+    ]},
+    { id:"mashriq", name:"بلاد الشام والعراق", countries:[
+      {code:"JO", name:"الأردن", flag:"🇯🇴"},
+      {code:"LB", name:"لبنان", flag:"🇱🇧"},
+      {code:"SY", name:"سوريا", flag:"🇸🇾"},
+      {code:"PS", name:"فلسطين", flag:"🇵🇸"},
+      {code:"IQ", name:"العراق", flag:"🇮🇶"},
+    ]},
+    { id:"nile-maghreb", name:"وادي النيل والمغرب العربي", countries:[
+      {code:"EG", name:"مصر", flag:"🇪🇬"},
+      {code:"SD", name:"السودان", flag:"🇸🇩"},
+      {code:"LY", name:"ليبيا", flag:"🇱🇾"},
+      {code:"TN", name:"تونس", flag:"🇹🇳"},
+      {code:"DZ", name:"الجزائر", flag:"🇩🇿"},
+      {code:"MA", name:"المغرب", flag:"🇲🇦"},
+      {code:"MR", name:"موريتانيا", flag:"🇲🇷"},
+    ]},
+    { id:"horn", name:"القرن الأفريقي", countries:[
+      {code:"YE", name:"اليمن", flag:"🇾🇪"},
+      {code:"SO", name:"الصومال", flag:"🇸🇴"},
+      {code:"DJ", name:"جيبوتي", flag:"🇩🇯"},
+      {code:"KM", name:"جزر القمر", flag:"🇰🇲"},
+    ]},
+  ];
+  const ARAB_CODES = new Set(REGIONS.flatMap(r => r.countries.map(c=>c.code)));
+
+  // ---------- state ----------
+  let currentRegionId = "gulf";
+  let currentCountry = "SA";
+  let searchMode = false;
+  let stationCache = {};       // code -> array
+  let favorites = [];          // array of station objects
+  let currentStation = null;
+  let isPlaying = false;
+  let searchDebounce = null;
+  let retryCount = 0;
+
+  // ---------- elements ----------
+  const el = {
+    regionTabs: document.getElementById("regionTabs"),
+    countryChips: document.getElementById("countryChips"),
+    stationGrid: document.getElementById("stationGrid"),
+    gridNotice: document.getElementById("gridNotice"),
+    searchInput: document.getElementById("searchInput"),
+    clearSearch: document.getElementById("clearSearch"),
+    nowPlaying: document.getElementById("nowPlaying"),
+    dialRing: document.getElementById("dialRing"),
+    dialStar: document.getElementById("dialStar"),
+    dialFreqs: document.getElementById("dialFreqs"),
+    dialCenter: document.getElementById("dialCenter"),
+    playerBar: document.getElementById("playerBar"),
+    playerEq: document.getElementById("playerEq"),
+    playerName: document.getElementById("playerName"),
+    playerSub: document.getElementById("playerSub"),
+    playPauseBtn: document.getElementById("playPauseBtn"),
+    playIcon: document.getElementById("playIcon"),
+    playerFavBtn: document.getElementById("playerFavBtn"),
+    closeBtn: document.getElementById("closeBtn"),
+    volume: document.getElementById("volume"),
+    audio: document.getElementById("audio"),
+  };
+
+  const PAUSE_ICON = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+  const PLAY_ICON = '<path d="M8 5v14l11-7z"/>';
+
+  // ---------- init dial frequency ticks ----------
+  const freqs = ["88.0","92.5","96.0","100.5","104.0","107.9","91.0","98.5"];
+  freqs.forEach((f,i)=>{
+    const angle = (360/freqs.length)*i - 90;
+    const rad = angle * Math.PI/180;
+    const r = 46; // percent radius
+    const span = document.createElement("span");
+    span.textContent = f;
+    span.style.left = (50 + r*Math.cos(rad)) + "%";
+    span.style.top = (50 + r*Math.sin(rad)) + "%";
+    span.style.transform = "translate(-50%,-50%)";
+    el.dialFreqs.appendChild(span);
+  });
+
+  // ---------- favorites persistence ----------
+  async function loadFavorites(){
+    try{
+      const res = await window.storage.get("favorites", false);
+      favorites = res && res.value ? JSON.parse(res.value) : [];
+    }catch(e){ favorites = []; }
+  }
+  async function saveFavorites(){
+    try{ await window.storage.set("favorites", JSON.stringify(favorites), false); }catch(e){}
+  }
+  function isFav(uuid){ return favorites.some(f=>f.stationuuid===uuid); }
+  function toggleFavorite(station){
+    if(isFav(station.stationuuid)){
+      favorites = favorites.filter(f=>f.stationuuid!==station.stationuuid);
+    }else{
+      favorites.push({
+        stationuuid: station.stationuuid, name: station.name,
+        url_resolved: station.url_resolved || station.url,
+        favicon: station.favicon, countrycode: station.countrycode,
+        bitrate: station.bitrate, codec: station.codec, tags: station.tags
+      });
+    }
+    saveFavorites();
+    updateFavIcons();
+    if(currentRegionId==="favorites") renderStations(favorites);
+  }
+  function updateFavIcons(){
+    document.querySelectorAll(".icon-btn.fav[data-uuid]").forEach(btn=>{
+      btn.classList.toggle("active", isFav(btn.dataset.uuid));
+    });
+    if(currentStation){
+      el.playerFavBtn.classList.toggle("active", isFav(currentStation.stationuuid));
+    }
+  }
+
+  // ---------- API ----------
+  async function apiFetch(path){
+    let lastErr;
+    for(const base of MIRRORS){
+      const controller = new AbortController();
+      const t = setTimeout(()=>controller.abort(), 7000);
+      try{
+        const res = await fetch(base + path, { signal: controller.signal });
+        clearTimeout(t);
+        if(!res.ok) throw new Error("bad status "+res.status);
+        return await res.json();
+      }catch(e){
+        clearTimeout(t);
+        lastErr = e;
+      }
+    }
+    console.error("Radio-Browser fetch failed on all mirrors:", lastErr);
+    throw lastErr || new Error("all mirrors failed");
+  }
+
+  async function fetchStationsByCountry(code){
+    if(stationCache[code]) return stationCache[code];
+    const data = await apiFetch(`/json/stations/search?countrycode=${code}&limit=30&hidebroken=true&order=clickcount&reverse=true`);
+    stationCache[code] = data;
+    return data;
+  }
+
+  async function searchStations(q){
+    const data = await apiFetch(`/json/stations/search?name=${encodeURIComponent(q)}&limit=40&hidebroken=true&order=votes&reverse=true`);
+    return data.filter(s => ARAB_CODES.has((s.countrycode||"").toUpperCase()));
+  }
+
+  // ---------- rendering: tabs ----------
+  function renderRegionTabs(){
+    el.regionTabs.innerHTML = "";
+    REGIONS.forEach(r=>{
+      const btn = document.createElement("button");
+      btn.className = "tab-btn" + (r.isFav ? " fav-tab" : "") + (r.id===currentRegionId && !searchMode ? " active" : "");
+      btn.textContent = r.name;
+      btn.addEventListener("click", ()=>{
+        searchMode = false;
+        el.searchInput.value = "";
+        el.clearSearch.hidden = true;
+        currentRegionId = r.id;
+        if(!r.isFav) currentCountry = r.countries[0].code;
+        renderRegionTabs();
+        renderCountryChips();
+        loadAndRenderStations();
+      });
+      el.regionTabs.appendChild(btn);
+    });
+  }
+
+  function renderCountryChips(){
+    const region = REGIONS.find(r=>r.id===currentRegionId);
+    el.countryChips.innerHTML = "";
+    if(!region || region.isFav){ el.countryChips.style.display="none"; return; }
+    el.countryChips.style.display = "flex";
+    region.countries.forEach(c=>{
+      const chip = document.createElement("button");
+      chip.className = "chip" + (c.code===currentCountry ? " active" : "");
+      chip.innerHTML = `<span>${c.flag}</span><span>${c.name}</span>`;
+      chip.addEventListener("click", ()=>{
+        currentCountry = c.code;
+        renderCountryChips();
+        loadAndRenderStations();
+      });
+      el.countryChips.appendChild(chip);
+    });
+  }
+
+  // ---------- rendering: states ----------
+  function renderSkeleton(){
+    el.stationGrid.innerHTML = "";
+    for(let i=0;i<8;i++){
+      const sk = document.createElement("div");
+      sk.className = "skeleton";
+      sk.innerHTML = `<div class="sk-line" style="height:14px;width:60%;margin-bottom:8px;"></div><div class="sk-line" style="height:10px;width:40%;"></div>`;
+      el.stationGrid.appendChild(sk);
+    }
+  }
+
+  function renderMessage(icon, text, showRetry){
+    el.stationGrid.innerHTML = `
+      <div class="state-msg">
+        <div class="big">${icon}</div>
+        <div>${text}</div>
+        ${showRetry ? '<button class="retry-btn" id="retryBtn">إعادة المحاولة</button>' : ''}
+      </div>`;
+    if(showRetry){
+      document.getElementById("retryBtn").addEventListener("click", loadAndRenderStations);
+    }
+  }
+
+  function faviconFallback(name){
+    const letter = (name||"؟").trim().charAt(0);
+    return letter;
+  }
+
+  function renderStations(list){
+    if(!list || list.length===0){
+      const msg = currentRegionId==="favorites"
+        ? "لا توجد محطات في المفضلة بعد. اضغط على القلب ♡ لإضافة محطة."
+        : "لا توجد نتائج حالياً.";
+      renderMessage("📻", msg, false);
+      return;
+    }
+    el.stationGrid.innerHTML = "";
+    list.forEach(station=>{
+      const uuid = station.stationuuid;
+      const active = currentStation && currentStation.stationuuid===uuid;
+      const card = document.createElement("div");
+      card.className = "card" + (active ? " card-active" : "");
+      const metaBits = [];
+      if(station.bitrate) metaBits.push(station.bitrate+" kbps");
+      if(station.tags) metaBits.push(station.tags.split(",")[0]);
+      card.innerHTML = `
+        <div class="card-logo">${station.favicon ? `<img src="${station.favicon}" alt="" onerror="this.parentElement.textContent='${faviconFallback(station.name)}'">` : faviconFallback(station.name)}</div>
+        <div class="card-body">
+          <div class="card-name">${station.name}</div>
+          <div class="card-meta">${metaBits.join(" · ") || "بث مباشر"}</div>
+        </div>
+        <div class="card-actions">
+          <button class="icon-btn fav ${isFav(uuid)?'active':''}" data-uuid="${uuid}" aria-label="إضافة للمفضلة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 5 6.5 5c2 0 3.5 1.2 4.5 2.5C12 6.2 13.5 5 15.5 5 19 5 21.5 8.5 19.5 12.5 17 16.65 12 21 12 21z"/></svg>
+          </button>
+          <button class="icon-btn play" aria-label="تشغيل">
+            <svg viewBox="0 0 24 24" fill="currentColor">${active && isPlaying ? PAUSE_ICON : PLAY_ICON}</svg>
+          </button>
+        </div>`;
+      card.querySelector(".icon-btn.play").addEventListener("click", (e)=>{
+        e.stopPropagation(); playStation(station);
+      });
+      card.querySelector(".icon-btn.fav").addEventListener("click", (e)=>{
+        e.stopPropagation(); toggleFavorite(station);
+      });
+      card.addEventListener("click", ()=> playStation(station));
+      el.stationGrid.appendChild(card);
+    });
+  }
+
+  async function loadAndRenderStations(){
+    clearGridNotice();
+    if(currentRegionId==="favorites"){
+      renderStations(favorites);
+      return;
+    }
+    renderSkeleton();
+    try{
+      const list = await fetchStationsByCountry(currentCountry);
+      renderStations(list);
+    }catch(e){
+      renderMessage("⚠️", "تعذّر الوصول إلى محطات هذا البلد الآن. تحقق من اتصالك بالإنترنت.", true);
+    }
+  }
+
+  function clearGridNotice(){ el.gridNotice.innerHTML = ""; }
+
+  // ---------- search ----------
+  el.searchInput.addEventListener("input", ()=>{
+    const q = el.searchInput.value.trim();
+    el.clearSearch.hidden = q.length===0;
+    clearTimeout(searchDebounce);
+    if(q.length < 2){
+      if(searchMode){ searchMode = false; loadAndRenderStations(); }
+      return;
+    }
+    searchDebounce = setTimeout(async ()=>{
+      searchMode = true;
+      clearGridNotice();
+      renderSkeleton();
+      try{
+        const results = await searchStations(q);
+        renderStations(results);
+      }catch(e){
+        renderMessage("⚠️", "تعذّر البحث الآن. حاول مرة أخرى.", true);
+      }
+    }, 400);
+  });
+  el.clearSearch.addEventListener("click", ()=>{
+    el.searchInput.value = "";
+    el.clearSearch.hidden = true;
+    searchMode = false;
+    loadAndRenderStations();
+  });
+
+  // ---------- player ----------
+  function setDialPlaying(on){
+    el.dialRing.classList.toggle("on-air", on);
+    el.dialStar.classList.toggle("on-air", on);
+    if(on){
+      el.dialCenter.innerHTML = '<div class="dial-eq"><i></i><i></i><i></i><i></i></div>';
+    }else{
+      el.dialCenter.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#f3ead4" stroke-width="1.6" stroke-linecap="round"><path d="M4 11a8 8 0 0 1 16 0"/><path d="M7.5 11a4.5 4.5 0 0 1 9 0"/><circle cx="12" cy="15" r="2" fill="#f3ead4" stroke="none"/></svg>';
+    }
+  }
+
+  function playStation(station){
+    const sameStation = currentStation && currentStation.stationuuid===station.stationuuid;
+    if(sameStation && isPlaying){
+      el.audio.pause();
+      return;
+    }
+    if(sameStation && !isPlaying){
+      el.audio.play().catch(onPlayError);
+      return;
+    }
+    currentStation = station;
+    retryCount = 0;
+    const url = station.url_resolved || station.url;
+    el.audio.src = url;
+    el.audio.play().catch(onPlayError);
+    el.playerBar.hidden = false;
+    el.playerName.textContent = station.name;
+    el.playerSub.textContent = [station.bitrate ? station.bitrate+" kbps" : null, station.tags ? station.tags.split(",")[0] : null].filter(Boolean).join(" · ") || "بث مباشر";
+    el.nowPlaying.textContent = "الآن على الهواء: " + station.name;
+    updateFavIcons();
+    updateMediaSession(station);
+    renderStations(currentRegionId==="favorites" ? favorites : lastRenderedList());
+    // fire-and-forget click registration (only for real API stations, not local fallbacks)
+    if(!String(station.stationuuid).startsWith("fb-")){
+      fetch(MIRRORS[0] + "/json/url/" + station.stationuuid).catch(()=>{});
+    }
+  }
+
+  // ---------- background playback (lock-screen / notification controls) ----------
+  function updateMediaSession(station){
+    if(!("mediaSession" in navigator)) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: station.name,
+      artist: "راديو الوطن العربي",
+      album: station.tags || "بث مباشر",
+    });
+    navigator.mediaSession.setActionHandler("play", ()=> el.audio.play().catch(onPlayError));
+    navigator.mediaSession.setActionHandler("pause", ()=> el.audio.pause());
+    navigator.mediaSession.setActionHandler("stop", ()=> el.closeBtn.click());
+  }
+
+  function lastRenderedList(){
+    return stationCache[currentCountry] || [];
+  }
+
+  function onPlayError(){
+    el.playerSub.textContent = "تعذّر تشغيل هذه المحطة الآن، جرّب محطة أخرى";
+  }
+
+  el.audio.addEventListener("playing", ()=>{
+    isPlaying = true;
+    retryCount = 0;
+    el.playIcon.innerHTML = PAUSE_ICON;
+    el.playerEq.classList.add("on");
+    setDialPlaying(true);
+    refreshCardIcons();
+    if("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing";
+  });
+  el.audio.addEventListener("pause", ()=>{
+    isPlaying = false;
+    el.playIcon.innerHTML = PLAY_ICON;
+    el.playerEq.classList.remove("on");
+    setDialPlaying(false);
+    refreshCardIcons();
+    if("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
+  });
+  el.audio.addEventListener("error", ()=>{
+    isPlaying = false;
+    el.playerEq.classList.remove("on");
+    setDialPlaying(false);
+    refreshCardIcons();
+    // radio streams drop momentarily — retry once before giving up
+    if(currentStation && retryCount < 1){
+      retryCount++;
+      el.playerSub.textContent = "إعادة الاتصال بالمحطة…";
+      setTimeout(()=>{
+        if(currentStation){
+          el.audio.src = currentStation.url_resolved || currentStation.url;
+          el.audio.play().catch(onPlayError);
+        }
+      }, 1500);
+    }else{
+      onPlayError();
+    }
+  });
+
+  function refreshCardIcons(){
+    document.querySelectorAll(".card").forEach(card=>{
+      const nameEl = card.querySelector(".card-name");
+      if(!nameEl) return;
+      const isActive = currentStation && nameEl.textContent === currentStation.name;
+      const icon = card.querySelector(".icon-btn.play svg");
+      if(isActive){
+        card.classList.add("card-active");
+        icon.innerHTML = isPlaying ? PAUSE_ICON : PLAY_ICON;
+      }else{
+        card.classList.remove("card-active");
+        icon.innerHTML = PLAY_ICON;
+      }
+    });
+  }
+
+  el.playPauseBtn.addEventListener("click", ()=>{
+    if(!currentStation) return;
+    if(isPlaying) el.audio.pause();
+    else el.audio.play().catch(onPlayError);
+  });
+  el.playerFavBtn.addEventListener("click", ()=>{
+    if(currentStation) toggleFavorite(currentStation);
+  });
+  el.closeBtn.addEventListener("click", ()=>{
+    el.audio.pause();
+    el.audio.removeAttribute("src");
+    el.audio.load();
+    currentStation = null;
+    el.playerBar.hidden = true;
+    el.nowPlaying.textContent = "";
+    refreshCardIcons();
+  });
+  el.volume.addEventListener("input", ()=>{
+    el.audio.volume = parseFloat(el.volume.value);
+  });
+  el.audio.volume = parseFloat(el.volume.value);
+
+  // ---------- boot ----------
+  (async function init(){
+    await loadFavorites();
+    renderRegionTabs();
+    renderCountryChips();
+    await loadAndRenderStations();
+  })();
+})();
+</script>
+</body>
+</html>
